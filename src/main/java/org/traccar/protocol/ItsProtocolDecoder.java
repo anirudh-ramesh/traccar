@@ -170,13 +170,17 @@ public class ItsProtocolDecoder extends BaseProtocolDecoder {
         boolean history = "H".equals(parser.next());
         String type = parser.next();
 
-        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
+        String identifier = parser.next();
+
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, identifier);
+        // DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
         if (deviceSession == null) {
             return null;
         }
 
         Position position = new Position(getProtocolName());
-        position.setDeviceId(deviceSession.getDeviceId());
+        // position.setDeviceId(deviceSession.getDeviceId());
+        position.setDeviceId(translateIdentifier(identifier));
 
         if (type != null && type.equals("EMR")) {
             position.set(Position.KEY_ALARM, Position.ALARM_SOS);

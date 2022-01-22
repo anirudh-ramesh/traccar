@@ -141,6 +141,48 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
         return 0;
     }
 
+// Added by Anirudh on 22/01/22
+// START
+
+    public long translateIdentifier(String... uniqueIds) {
+        if (uniqueIds.length > 0) {
+            long deviceId = 0;
+            Device device = null;
+            try {
+                for (String uniqueId : uniqueIds) {
+                    if (uniqueId != null) {
+                        device = identityManager.getByUniqueId(uniqueId);
+                        if (device != null) {
+                            deviceId = device.getId();
+                            break;
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                LOGGER.warn("Find device error", e);
+            }
+            if (deviceId == 0 && config.getBoolean(Keys.DATABASE_REGISTER_UNKNOWN)) {
+                return identityManager.addUnknownDevice(uniqueIds[0]);
+            }
+            if (device != null && !device.getDisabled()) {
+                return deviceId;
+            }
+            StringBuilder message = new StringBuilder();
+            if (deviceId == 0) {
+                message.append("Unknown device -");
+            } else {
+                message.append("Disabled device -");
+            }
+            for (String uniqueId : uniqueIds) {
+                message.append(" ").append(uniqueId);
+            }
+            LOGGER.warn(message.toString());
+        }
+        return 0;
+    }
+
+// STOP
+
     public DeviceSession getDeviceSession(Channel channel, SocketAddress remoteAddress, String... uniqueIds) {
         return getDeviceSession(channel, remoteAddress, false, uniqueIds);
     }
